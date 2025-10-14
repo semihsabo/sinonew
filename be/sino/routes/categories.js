@@ -140,8 +140,11 @@ router.post('/', protect, authorize('admin'), async (req, res) => {
       });
     }
 
+    // Generate unique ID
+    const maxId = categories.length > 0 ? Math.max(...categories.map(cat => cat.id)) : 0;
+    
     const newCategory = {
-      id: categories.length + 1,
+      id: maxId + 1,
       name,
       description,
       productCount: 0,
