@@ -19,7 +19,25 @@ exports.protect = async (req, res, next) => {
     }
 
     try {
-      // Verify token
+      // Check if it's a demo token
+      if (token.startsWith('demo_token_')) {
+        const demoUserId = token.replace('demo_token_', '');
+        
+        // Demo users
+        const demoUsers = {
+          'demo1': { id: 'demo1', email: 'admin@liftpick.com', name: 'Admin User', role: 'admin' },
+          'demo2': { id: 'demo2', email: 'user@liftpick.com', name: 'Test User', role: 'user' },
+          'demo3': { id: 'demo3', email: 'test@test.com', name: 'Demo User', role: 'user' }
+        };
+        
+        const demoUser = demoUsers[demoUserId];
+        if (demoUser) {
+          req.user = demoUser;
+          return next();
+        }
+      }
+
+      // Verify JWT token
       const jwtSecret = process.env.JWT_SECRET || 'jcres_super_secret_jwt_key_2024_development_only';
       const decoded = jwt.verify(token, jwtSecret);
 
