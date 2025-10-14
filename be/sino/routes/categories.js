@@ -1,64 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
+const { mockCategories } = require('../data/mockData');
 
-// Mock categories data
-const categories = [
-  {
-    id: 1,
-    name: 'Fitness Ekipmanları',
-    description: 'Genel fitness ve antrenman ekipmanları',
-    productCount: 15,
-    status: 'active',
-    createdAt: '2024-01-15',
-    color: 'bg-blue-500',
-  },
-  {
-    id: 2,
-    name: 'Yoga Ürünleri',
-    description: 'Yoga matları, blokları ve aksesuarları',
-    productCount: 8,
-    status: 'active',
-    createdAt: '2024-01-20',
-    color: 'bg-purple-500',
-  },
-  {
-    id: 3,
-    name: 'Protein ve Beslenme',
-    description: 'Protein tozları, vitaminler ve besin takviyeleri',
-    productCount: 12,
-    status: 'active',
-    createdAt: '2024-02-01',
-    color: 'bg-green-500',
-  },
-  {
-    id: 4,
-    name: 'Kardiyo Ekipmanları',
-    description: 'Koşu bandları, bisikletler ve kardiyo makineleri',
-    productCount: 6,
-    status: 'active',
-    createdAt: '2024-02-10',
-    color: 'bg-red-500',
-  },
-  {
-    id: 5,
-    name: 'Ağırlık Antrenmanı',
-    description: 'Dumbbelllar, barbelllar ve ağırlık ekipmanları',
-    productCount: 20,
-    status: 'active',
-    createdAt: '2024-02-15',
-    color: 'bg-orange-500',
-  },
-  {
-    id: 6,
-    name: 'Spor Giyim',
-    description: 'Antrenman kıyafetleri ve spor ayakkabıları',
-    productCount: 0,
-    status: 'inactive',
-    createdAt: '2024-03-01',
-    color: 'bg-pink-500',
-  },
-];
+// Use mock categories from data file
+const categories = mockCategories.map(cat => ({
+  id: cat._id,
+  name: cat.name,
+  description: cat.description,
+  productCount: cat.productCount,
+  status: cat.status,
+  createdAt: cat.createdAt.toISOString().split('T')[0],
+  color: `bg-${['blue', 'purple', 'green', 'red', 'orange', 'pink'][Math.floor(Math.random() * 6)]}-500`
+}));
 
 // @route   GET /api/categories
 // @desc    Get all categories

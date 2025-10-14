@@ -3,55 +3,60 @@ const router = express.Router();
 const Product = require('../models/Product');
 const { protect, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { mockProducts } = require('../data/mockData');
 
 // @route   GET /api/products
 // @desc    Get all products
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const { category, minPrice, maxPrice, search, sort } = req.query;
+    const { category, minPrice, maxPrice, search, sort, status } = req.query;
     
-    let query = {};
+    let products = [...mockProducts];
 
     // Filter by category
-    if (category) {
-      query.category = category;
+    if (category && category !== 'all') {
+      products = products.filter(product => 
+        product.category.toLowerCase() === category.toLowerCase()
+      );
+    }
+
+    // Filter by status
+    if (status && status !== 'all') {
+      products = products.filter(product => product.status === status);
     }
 
     // Filter by price range
-    if (minPrice || maxPrice) {
-      query.price = {};
-      if (minPrice) query.price.$gte = Number(minPrice);
-      if (maxPrice) query.price.$lte = Number(maxPrice);
+    if (minPrice) {
+      products = products.filter(product => product.price >= Number(minPrice));
+    }
+    if (maxPrice) {
+      products = products.filter(product => product.price <= Number(maxPrice));
     }
 
     // Search by name or description
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
-      ];
+      products = products.filter(product => 
+        product.name.toLowerCase().includes(search.toLowerCase()) ||
+        product.description.toLowerCase().includes(search.toLowerCase())
+      );
     }
-
-    let products = Product.find(query);
 
     // Sort
     if (sort === 'price_asc') {
-      products = products.sort({ price: 1 });
+      products.sort((a, b) => a.price - b.price);
     } else if (sort === 'price_desc') {
-      products = products.sort({ price: -1 });
+      products.sort((a, b) => b.price - a.price);
     } else if (sort === 'newest') {
-      products = products.sort({ createdAt: -1 });
+      products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else {
-      products = products.sort({ createdAt: -1 });
+      products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
-
-    const result = await products;
 
     res.json({
       success: true,
-      count: result.length,
-      products: result
+      count: products.length,
+      products
     });
   } catch (error) {
     res.status(500).json({
@@ -66,7 +71,7 @@ router.get('/', async (req, res) => {
 // @access  Public
 router.get('/:id', async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = mockProducts.find(p => p._id === req.params.id);
 
     if (!product) {
       return res.status(404).json({
