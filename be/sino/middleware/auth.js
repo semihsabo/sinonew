@@ -20,7 +20,8 @@ exports.protect = async (req, res, next) => {
 
     try {
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const jwtSecret = process.env.JWT_SECRET || 'jcres_super_secret_jwt_key_2024_development_only';
+      const decoded = jwt.verify(token, jwtSecret);
 
       // Get user from token
       req.user = await User.findById(decoded.id);
