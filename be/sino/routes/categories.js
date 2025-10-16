@@ -161,7 +161,10 @@ router.put('/:id', protect, authorize('admin'), async (req, res) => {
 // @access  Private/Admin
 router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   try {
-    const categoryIndex = categories.findIndex(cat => cat.id === parseInt(req.params.id));
+    // Check both string and integer ID formats
+    const categoryIndex = categories.findIndex(cat => 
+      cat.id === parseInt(req.params.id) || cat.id === req.params.id || cat._id === req.params.id
+    );
 
     if (categoryIndex === -1) {
       return res.status(404).json({

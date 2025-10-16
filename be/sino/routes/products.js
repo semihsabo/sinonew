@@ -154,9 +154,31 @@ router.put('/:id', protect, authorize('admin'), async (req, res) => {
 // @access  Private/Admin
 router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    let product = null;
+    
+    // Try to find product in database first (only if it looks like a valid ObjectId)
+    if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      try {
+        product = await Product.findById(req.params.id);
+      } catch (dbError) {
+        // Ignore database errors for non-ObjectId strings
+        console.log('Database query failed for ID:', req.params.id);
+      }
+    }
 
+    // If not found in database, check mock data
     if (!product) {
+      const { mockProducts } = require('../data/mockData');
+      const mockProduct = mockProducts.find(p => p._id === req.params.id);
+      
+      if (mockProduct) {
+        // Mock delete - just return success
+        return res.json({
+          success: true,
+          message: 'Product deleted (mock)'
+        });
+      }
+      
       return res.status(404).json({
         success: false,
         message: 'Product not found'

@@ -25,9 +25,9 @@ exports.protect = async (req, res, next) => {
         
         // Demo users
         const demoUsers = {
-          'demo1': { id: 'demo1', email: 'admin@liftpick.com', name: 'Admin User', role: 'admin' },
-          'demo2': { id: 'demo2', email: 'user@liftpick.com', name: 'Test User', role: 'user' },
-          'demo3': { id: 'demo3', email: 'test@test.com', name: 'Demo User', role: 'user' }
+          '1': { id: 'demo1', email: 'admin@liftpick.com', name: 'Admin User', role: 'admin' },
+          '2': { id: 'demo2', email: 'user@liftpick.com', name: 'Test User', role: 'user' },
+          '3': { id: 'demo3', email: 'test@test.com', name: 'Demo User', role: 'user' }
         };
         
         const demoUser = demoUsers[demoUserId];

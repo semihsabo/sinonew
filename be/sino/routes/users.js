@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 // @route   GET /api/users/profile
 // @desc    Get user profile
@@ -203,6 +203,72 @@ router.delete('/favorites/:productId', protect, async (req, res) => {
         message: 'User not found'
       });
     }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// @route   GET /api/users
+// @desc    Get all users (Admin only)
+// @access  Private/Admin
+router.get('/', protect, authorize('admin'), async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    
+    res.json({
+      success: true,
+      users
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// @route   DELETE /api/users/:id
+// @desc    Delete user (Admin only)
+// @access  Private/Admin
+router.delete('/:id', protect, authorize('admin'), async (req, res) => {
+  try {
+    // Try to find user in database first
+    let user = await User.findById(req.params.id);
+
+    // If not found in database, check mock users
+    if (!user) {
+      // Mock users for demo
+      const mockUsers = [
+        { id: 1, email: 'admin@liftpick.com', name: 'Admin User', role: 'admin' },
+        { id: 2, email: 'user@liftpick.com', name: 'Test User', role: 'user' },
+        { id: 3, email: 'test@test.com', name: 'Demo User', role: 'user' }
+      ];
+      
+      const mockUser = mockUsers.find(u => u.id === parseInt(req.params.id) || u.id === req.params.id);
+      
+      if (mockUser) {
+        // Mock delete - just return success
+        return res.json({
+          success: true,
+          message: 'User deleted (mock)'
+        });
+      }
+      
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    await user.deleteOne();
+
+    res.json({
+      success: true,
+      message: 'User deleted successfully'
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
